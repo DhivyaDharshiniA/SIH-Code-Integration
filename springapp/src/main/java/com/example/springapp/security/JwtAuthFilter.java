@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -46,18 +47,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 String abhaId = claims.getSubject();
                 String role = claims.get("role", String.class);
 
-                // Prefix ROLE_ to match Spring Security format
+                // ✅ Use role directly for hasAuthority("ADMIN") etc.
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(abhaId, null,
-                                List.of(() -> "ROLE_" + role));
+                        new UsernamePasswordAuthenticationToken(
+                                abhaId,
+                                null,
+                                List.of(new SimpleGrantedAuthority(role))
+                        );
 
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
             } catch (Exception e) {
                 System.out.println("Invalid JWT: " + e.getMessage());
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // optional: return 401
-                return; // stop further processing
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
             }
         }
 

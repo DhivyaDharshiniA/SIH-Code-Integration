@@ -31,4 +31,14 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    // ✅ Extract role from token
+    public String extractRole(String token) {
+        return validateToken(token).get("role", String.class);
+    }
+
+    // ✅ Extract ABHA ID (subject) from token
+    public String extractAbhaId(String token) {
+        return validateToken(token).getSubject();
+    }
 }

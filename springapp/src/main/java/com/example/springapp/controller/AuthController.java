@@ -19,12 +19,7 @@ public class AuthController {
         this.userRepository = userRepository;
     }
 
-    @PostMapping("/register")
-    public User register(@RequestBody User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
-    }
-
+    // ✅ Only login is public
     @PostMapping("/login")
     public String login(@RequestBody User user) {
         User dbUser = userRepository.findByAbhaId(user.getAbhaId())

@@ -22,12 +22,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll() // Public
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/doctor/**").hasRole("DOCTOR")
-                .requestMatchers("/patient/**").hasAnyRole("ADMIN","DOCTOR")
-                .requestMatchers("/insurer/**").hasRole("INSURER")
-                .requestMatchers("/govt/**").hasRole("GOVT")
+                .requestMatchers("/auth/**", "/users/register").permitAll() // Public
+                .requestMatchers("/admin/**").hasAuthority("ADMIN")
+.requestMatchers("/doctor/**").hasAuthority("DOCTOR")
+.requestMatchers("/patient/**").hasAnyAuthority("ADMIN","DOCTOR")
+.requestMatchers("/insurer/**").hasAuthority("INSURER")
+.requestMatchers("/govt/**").hasAuthority("GOVT")
+
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

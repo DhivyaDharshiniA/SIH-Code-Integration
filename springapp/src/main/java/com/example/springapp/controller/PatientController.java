@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/patient")
+@RequestMapping("/api/patients")
 public class PatientController {
 
     private final PatientService patientService;
@@ -18,61 +18,31 @@ public class PatientController {
         this.patientService = patientService;
     }
 
-    // -------------------------
-    // Add new patient
-    // Only Doctor or Admin
-    // -------------------------
-    @PostMapping
-    @PreAuthorize("hasAnyRole('DOCTOR','ADMIN')")
-    public ResponseEntity<Patient> addPatient(@RequestBody Patient patient) {
-        Patient saved = patientService.addPatient(patient);
-        return ResponseEntity.ok(saved);
+    @PostMapping("/register")
+    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN', 'GOVT')")
+    public ResponseEntity<Patient> registerPatient(@RequestBody Patient patient) {
+        return ResponseEntity.ok(patientService.registerPatient(patient));
     }
 
-    // -------------------------
-    // Get patient by ID
-    // Doctor/Admin can access all
-    // Patient can access own profile
-    // -------------------------
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('DOCTOR','ADMIN','PATIENT')")
-    public ResponseEntity<Patient> getPatient(@PathVariable Long id) {
-        return patientService.getPatientById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // -------------------------
-    // Update patient info
-    // Only Doctor or Admin
-    // -------------------------
-    @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('DOCTOR','ADMIN')")
-    public ResponseEntity<Patient> updatePatient(@PathVariable Long id, @RequestBody Patient updated) {
-        return patientService.updatePatient(id, updated)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // -------------------------
-    // List all patients
-    // Only Doctor or Admin
-    // -------------------------
-    @GetMapping
-    @PreAuthorize("hasAnyRole('DOCTOR','ADMIN')")
-    public List<Patient> getAllPatients() {
-        return patientService.getAllPatients();
-    }
-
-    // -------------------------
-    // Optional: Get logged-in patient profile
-    // Patient can access own profile via ABHA ID
-    // -------------------------
-    @GetMapping("/me")
-    @PreAuthorize("hasRole('PATIENT')")
-    public ResponseEntity<Patient> getMyProfile(@RequestParam String abhaId) {
+    @GetMapping("/{abhaId}")
+    @PreAuthorize("hasAnyRole('DOCTOR', 'INSURER', 'GOVT', 'PATIENT')")
+    public ResponseEntity<Patient> getPatient(@PathVariable String abhaId) {
         return patientService.getPatientByAbhaId(abhaId)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'GOVT')")
+    public ResponseEntity<List<Patient>> getAllPatients() {
+        return ResponseEntity.ok(patientService.getAllPatients());
+    }
+
+    @PutMapping("/{abhaId}")
+    @PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
+    public ResponseEntity<Patient> updatePatient(@PathVariable String abhaId, @RequestBody Patient updatedPatient) {
+        return ResponseEntity.ok(patientService.updatePatient(abhaId, updatedPatient));
+    }
+
+    
 }

@@ -14,7 +14,7 @@ public class User {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String abhaId;  // acts like username
+    private String abhaId;  
 
     private String password;
 
